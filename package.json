@@ -4,7 +4,10 @@
   "description": "",
   "main": "lib/amqp.js",
   "scripts": {
-    "test": "eslint lib/**/*.js test/**/*.js && mocha test/unit/**/*,js"
+    "test": "eslint lib/**/*.js test/**/*.js && mocha test/unit/**/*,js",
+    "patch-release": "npm version patch && npm publish && git push origin master --follow-tags",
+    "minor-release": "npm version minor && npm publish && git push origin master --follow-tags",
+    "major-release": "npm version major && npm publish && git push origin master --follow-tags"
   },
   "keywords": ["amqp", "fluent", "highland", "streaming", "reconnecting"],
   "author": "Johan Öbrink <johan.obrink@gmail.com>",
