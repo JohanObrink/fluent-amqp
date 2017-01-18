@@ -2,10 +2,9 @@
 
 To run the examples:
 
-  1. In `fluent-amqp` root, run `docker-compose up`
-  2. Open RabbitMQ Management on [http://localhost:8080/](http://localhost:8080/)
-  3. Go into the `examples` folder
-  4. Run `npm install`
+  1. Run `npm install`
+  2. Run `docker-compose up`
+  3. Open RabbitMQ Management on [http://localhost:8080/](http://localhost:8080/)
 
 ## simple
 
