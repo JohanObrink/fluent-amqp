@@ -1,0 +1,6 @@
+{
+  "name": "fluent-amqp-examples",
+  "dependencies": {
+    "fluent-amqp": "^0.1.1"
+  }
+}

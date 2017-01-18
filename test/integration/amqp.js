@@ -24,8 +24,8 @@ describe('integration: amqp', () => {
   describe('Hello World', () => {
     let publisher, subscriber
     beforeEach(() => {
-      publisher = host.queue('hello', {durable: false})
-      subscriber = host.queue('hello', {durable: false})
+      publisher = host.queue('test_hello', {durable: false})
+      subscriber = host.queue('test_hello', {durable: false})
     })
     afterEach(() => {
       return Promise
@@ -54,9 +54,9 @@ describe('integration: amqp', () => {
   describe('Work queues', () => {
     let publisher, worker1, worker2
     beforeEach(() => {
-      publisher = host.queue('tasks', {durable: true})
-      worker1 = host.queue('tasks', {durable: true})
-      worker2 = host.queue('tasks', {durable: true})
+      publisher = host.queue('test_tasks', {durable: true})
+      worker1 = host.queue('test_tasks', {durable: true})
+      worker2 = host.queue('test_tasks', {durable: true})
     })
     afterEach(() => {
       return Promise
@@ -94,33 +94,46 @@ describe('integration: amqp', () => {
     })
   })
   describe('Publish/Subscribe', () => {
-    let publisher, subscriber
+    let publisher, subscriber1, subscriber2
     beforeEach(() => {
       publisher = host
-        .exchange('test', 'fanout', {durable: false})
+        .exchange('test_exchange', 'fanout', {durable: false})
 
-      subscriber = host
-        .exchange('test', 'fanout', {durable: false})
-        .queue('listener', {exclusive: false})
+      subscriber1 = host
+        .exchange('test_exchange', 'fanout', {durable: false})
+        .queue('test_listener', {exclusive: false})
+
+      subscriber2 = host
+        .exchange('test_exchange', 'fanout', {durable: false})
+        .queue('', {exclusive: true})
     })
     afterEach(() => {
       return Promise
         .all([
           publisher.delete(),
-          subscriber.delete()
+          subscriber1.delete()
         ])
     })
     it('works', () => {
-      const listener = spy()
-      subscriber.subscribe()
-        .each(msg => listener(msg.string()))
+      const listener1 = spy()
+      subscriber1.subscribe()
+        .each(msg => listener1(msg.string()))
+
+      const listener2 = spy()
+      subscriber2.subscribe()
+        .each(msg => listener2(msg.string()))
 
       return wait(50)
         .then(() => publisher.publish('hello'))
         .then(() => publisher.publish('world'))
         .then(() => wait(50))
         .then(() => {
-          expect(listener)
+          expect(listener1)
+            .calledTwice
+            .calledWith('hello')
+            .calledWith('world')
+
+          expect(listener2)
             .calledTwice
             .calledWith('hello')
             .calledWith('world')
@@ -131,19 +144,19 @@ describe('integration: amqp', () => {
     let publisher, subscriber1, subscriber2, subscriber3
     beforeEach(() => {
       publisher = host
-        .exchange('logs', 'direct', {durable: false})
+        .exchange('test_exchange', 'direct', {durable: false})
 
       subscriber1 = host
-        .exchange('logs', 'direct', {durable: false})
-        .queue('subscriber1', {exclusive: false})
+        .exchange('test_exchange', 'direct', {durable: false})
+        .queue('test_subscriber1', {exclusive: false})
 
       subscriber2 = host
-        .exchange('logs', 'direct', {durable: false})
-        .queue('subscriber2', {exclusive: false})
+        .exchange('test_exchange', 'direct', {durable: false})
+        .queue('test_subscriber2', {exclusive: false})
 
       subscriber3 = host
-        .exchange('logs', 'direct', {durable: false})
-        .queue('subscriber3', {exclusive: false})
+        .exchange('test_exchange', 'direct', {durable: false})
+        .queue('test_subscriber3', {exclusive: false})
     })
     afterEach(() => {
       return Promise
@@ -197,23 +210,23 @@ describe('integration: amqp', () => {
     let publisher, subscriber1, subscriber2, subscriber3, subscriber4
     beforeEach(() => {
       publisher = host
-        .exchange('logs', 'topic', {durable: false})
+        .exchange('test_exchange', 'topic', {durable: false})
 
       subscriber1 = host
-        .exchange('logs', 'topic', {durable: false})
-        .queue('subscriber1', {exclusive: false})
+        .exchange('test_exchange', 'topic', {durable: false})
+        .queue('test_subscriber1', {exclusive: false})
 
       subscriber2 = host
-        .exchange('logs', 'topic', {durable: false})
-        .queue('subscriber2', {exclusive: false})
+        .exchange('test_exchange', 'topic', {durable: false})
+        .queue('test_subscriber2', {exclusive: false})
 
       subscriber3 = host
-        .exchange('logs', 'topic', {durable: false})
-        .queue('subscriber3', {exclusive: false})
+        .exchange('test_exchange', 'topic', {durable: false})
+        .queue('test_subscriber3', {exclusive: false})
 
       subscriber4 = host
-        .exchange('logs', 'topic', {durable: false})
-        .queue('subscriber4', {exclusive: false})
+        .exchange('test_exchange', 'topic', {durable: false})
+        .queue('test_subscriber4', {exclusive: false})
     })
     afterEach(() => {
       return Promise

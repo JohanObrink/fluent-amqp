@@ -29,7 +29,7 @@ amqp('amqp://localhost')
 amqp('amqp://localhost')
   .queue(q, {durable: false})
   .subscribe()
-  .each(msg => console.log(` [x] Received ${msg.string()}`))
+  .each(msg => console.log(` [x] Received '${msg.string()}'`))
 ```
 
 #### ...with JSON
@@ -72,7 +72,7 @@ amqp('amqp://localhost')
   .queue(q, {durable: true})
   .subscribe({prefetch: 1, noAck: false})
   .each(msg => {
-    console.log(` [x] Received ${msg.string()}`)
+    console.log(` [x] Received '${msg.string()}'`)
     msg.ack()
   })
 ```
@@ -89,17 +89,17 @@ const message = 'Hello World!'
 
 // publish
 amqp('amqp://localhost')
-  .exchange(ex, 'fanout', {durable: false})
+  .exchange(ex, exchangeType, {durable: false})
   .publish(message)
   .then(() => console.log(` [x] Sent '${message}'`))
 
 // subscribe
 amqp('amqp://localhost')
-  .queue(q, {durable: true})
   .exchange(ex, exchangeType, {durable: false})
+  .queue(q, {durable: true})
   .subscribe()
   .each(msg => {
-    console.log(` [x] Received ${msg.string()}`)
+    console.log(` [x] Received '${msg.string()}'`)
     msg.ack()
   })
 ```
@@ -127,7 +127,7 @@ amqp('amqp://localhost')
   .queue()
   .subscribe([severity])
   .each(msg => {
-    console.log(` [x] Received [${msg.fields.routingKey}] ${msg.string()}`)
+    console.log(` [x] Received [${msg.fields.routingKey}] '${msg.string()}'`)
     msg.ack()
   })
 ```
@@ -155,7 +155,7 @@ amqp('amqp://localhost')
   .queue()
   .subscribe(['anonymous.*'])
   .each(msg => {
-    console.log(` [x] Received [${msg.fields.routingKey}] ${msg.string()}`)
+    console.log(` [x] Received [${msg.fields.routingKey}] '${msg.string()}'`)
     msg.ack()
   })
 ```
