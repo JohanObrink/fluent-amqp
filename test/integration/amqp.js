@@ -69,11 +69,11 @@ describe('integration: amqp', () => {
     it('works', () => {
       const listener1 = spy()
       worker1
-        .subscribe({prefetch: 1})
+        .subscribe({prefetch: 1, noAck: false})
         .each(msg => listener1(msg.string() || msg.ack()))
       const listener2 = spy()
       worker2
-        .subscribe({prefetch: 1})
+        .subscribe({prefetch: 1, noAck: false})
         .each(msg => listener2(msg.string() || msg.ack()))
 
       return wait(50)

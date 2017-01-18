@@ -67,12 +67,101 @@ amqp('amqp://localhost')
   .publish(message, {persistent: true})
   .then(() => console.log(` [x] Sent '${message}'`))
 
-// recieve
+// worker
 amqp('amqp://localhost')
   .queue(q, {durable: true})
-  .subscribe({prefetch: 1})
+  .subscribe({prefetch: 1, noAck: false})
   .each(msg => {
     console.log(` [x] Received ${msg.string()}`)
     msg.ack()
   })
 ```
+
+### 3 Publish/Subscribe
+
+[https://www.rabbitmq.com/tutorials/tutorial-three-javascript.html](https://www.rabbitmq.com/tutorials/tutorial-three-javascript.html)
+
+```javascript
+const amqp = require('fluent-amqp')
+const ex = 'logs'
+const exchangeType = 'fanout'
+const message = 'Hello World!'
+
+// publish
+amqp('amqp://localhost')
+  .exchange(ex, 'fanout', {durable: false})
+  .publish(message)
+  .then(() => console.log(` [x] Sent '${message}'`))
+
+// subscribe
+amqp('amqp://localhost')
+  .queue(q, {durable: true})
+  .exchange(ex, exchangeType, {durable: false})
+  .subscribe()
+  .each(msg => {
+    console.log(` [x] Received ${msg.string()}`)
+    msg.ack()
+  })
+```
+
+### 4 Routing
+
+[https://www.rabbitmq.com/tutorials/tutorial-four-javascript.html](https://www.rabbitmq.com/tutorials/tutorial-four-javascript.html)
+
+```javascript
+const amqp = require('fluent-amqp')
+const ex = 'direct_logs'
+const exchangeType = 'direct'
+const message = 'Hello World!'
+const severity = 'info'
+
+// send
+amqp('amqp://localhost')
+  .exchange(ex, exchangeType, {durable: false})
+  .publish(message, severity)
+  .then(() => console.log(` [x] Sent '${message}'`))
+
+// recieve
+amqp('amqp://localhost')
+  .exchange(ex, exchangeType, {durable: false})
+  .queue()
+  .subscribe([severity])
+  .each(msg => {
+    console.log(` [x] Received [${msg.fields.routingKey}] ${msg.string()}`)
+    msg.ack()
+  })
+```
+
+### 5 Topics
+
+[https://www.rabbitmq.com/tutorials/tutorial-five-javascript.html](https://www.rabbitmq.com/tutorials/tutorial-five-javascript.html)
+
+```javascript
+const amqp = require('fluent-amqp')
+const ex = 'topic_logs'
+const exchangeType = 'topic'
+const message = 'Hello World!'
+const topic = 'anonymous.info'
+
+// send
+amqp('amqp://localhost')
+  .exchange(ex, exchangeType, {durable: false})
+  .publish(message, topic)
+  .then(() => console.log(` [x] Sent '${message}'`))
+
+// recieve
+amqp('amqp://localhost')
+  .exchange(ex, exchangeType, {durable: false})
+  .queue()
+  .subscribe(['anonymous.*'])
+  .each(msg => {
+    console.log(` [x] Received [${msg.fields.routingKey}] ${msg.string()}`)
+    msg.ack()
+  })
+```
+
+### 6 RPC
+
+[https://www.rabbitmq.com/tutorials/tutorial-six-javascript.html](https://www.rabbitmq.com/tutorials/tutorial-six-javascript.html)
+
+Coming later...
