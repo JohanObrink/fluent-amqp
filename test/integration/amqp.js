@@ -336,4 +336,38 @@ describe('integration: amqp', () => {
         })
     })
   })
+  describe('Connecting to cluster', () => {
+    let publisher, subscriber
+    before(() => {
+      host = amqp(['amqp://notlocalhost', 'amqp://notlocalhost', 'amqp://localhost'])
+      return host.connect()
+    })
+    beforeEach(() => {
+      publisher = host.queue('test_hello', {durable: false})
+      subscriber = host.queue('test_hello', {durable: false})
+    })
+    afterEach(() => {
+      return Promise
+        .all([
+          publisher.delete(),
+          subscriber.delete()
+        ])
+    })
+    it('works', () => {
+      const listener = spy()
+      subscriber.subscribe()
+        .each(msg => listener(msg.string()))
+
+      return wait(50)
+        .then(() => publisher.publish('hello'))
+        .then(() => publisher.publish('world'))
+        .then(() => wait(50))
+        .then(() => {
+          expect(listener)
+            .calledTwice
+            .calledWith('hello')
+            .calledWith('world')
+        })
+    })
+  })
 })
