@@ -165,3 +165,12 @@ amqp('amqp://localhost')
 [https://www.rabbitmq.com/tutorials/tutorial-six-javascript.html](https://www.rabbitmq.com/tutorials/tutorial-six-javascript.html)
 
 Coming later...
+
+### Connecting to a cluster
+
+If you are using a cluster and want the client to iterate between the different servers as soon as one fails or becomes unresponsive,
+just add them as an array.
+
+```javascript
+amqp(['amqp://host1', 'amqp://host2', 'amqp://host3'])
+```
