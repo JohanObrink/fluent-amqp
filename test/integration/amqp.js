@@ -93,6 +93,113 @@ describe('integration: amqp', () => {
         })
     })
   })
+  describe('Requeueing messages', () => {
+    let publisher, subscriber
+    beforeEach(() => {
+      publisher = host.queue('test_requeueing', {durable: false})
+      subscriber = host.queue('test_requeueing', {durable: false})
+    })
+    afterEach(() => {
+      return Promise
+        .all([
+          publisher.delete(),
+          subscriber.delete()
+        ])
+    })
+    it('works', () => {
+      const listener = spy()
+      let requeues = 0
+      subscriber.subscribe({noAck: false})
+        .each(msg => {
+          if (requeues <= 1) {
+            listener(msg.string())
+            msg.nack(false, true)
+            requeues++
+          }
+        })
+
+      return wait(50)
+        .then(() => Promise.all([
+          publisher.publish('hello')
+        ]))
+        .then(() => wait(50))
+        .then(() => {
+          expect(listener)
+            .calledTwice
+            .calledWith('hello')
+        })
+    })
+  })
+  describe('Requeues messages with no args passed', () => {
+    let publisher, subscriber
+    beforeEach(() => {
+      publisher = host.queue('test_noargs', {durable: false})
+      subscriber = host.queue('test_noargs', {durable: false})
+    })
+    afterEach(() => {
+      return Promise
+        .all([
+          publisher.delete(),
+          subscriber.delete()
+        ])
+    })
+    it('also defaults to this behaviour if no args are passed', () => {
+      const listener = spy()
+      let requeues = 0
+      subscriber.subscribe({noAck: false})
+        .each(msg => {
+          if (requeues <= 1) {
+            listener(msg.string())
+            msg.nack()
+            requeues++
+          }
+        })
+
+      return wait(50)
+        .then(() => Promise.all([
+          publisher.publish('hello')
+        ]))
+        .then(() => wait(50))
+        .then(() => {
+          expect(listener)
+            .calledTwice
+            .calledWith('hello')
+        })
+    })
+  })
+  describe('Nack without requeuing', () => {
+    let publisher, subscriber
+    beforeEach(() => {
+      publisher = host.queue('test_norequeue', {durable: false})
+      subscriber = host.queue('test_norequeue', {durable: false})
+    })
+    afterEach(() => {
+      return Promise
+        .all([
+          publisher.delete(),
+          subscriber.delete()
+        ])
+    })
+    it('does not requeue if arg is passed as false', () => {
+      const listener = spy()
+      subscriber.subscribe({noAck: false})
+        .each(msg => {
+          listener(msg.string())
+          msg.nack(false, false)
+        })
+
+      return wait(50)
+        .then(() => Promise.all([
+          publisher.publish('hello')
+        ]))
+        .then(() => wait(50))
+        .then(() => {
+          expect(listener)
+            .calledOnce
+            .calledWith('hello')
+        })
+    })
+  })
   describe('Exchange', () => {
     let publisher, subscriber
     beforeEach(() => {
@@ -137,14 +244,14 @@ describe('integration: amqp', () => {
     let publisher, subscriber1, subscriber2
     beforeEach(() => {
       publisher = host
-        .exchange('test_exchange', 'fanout', {durable: false})
+        .exchange('test_exchange_publish', 'fanout', {durable: false})
 
       subscriber1 = host
-        .exchange('test_exchange', 'fanout', {durable: false})
+        .exchange('test_exchange_publish', 'fanout', {durable: false})
         .queue('test_listener', {exclusive: false})
 
       subscriber2 = host
-        .exchange('test_exchange', 'fanout', {durable: false})
+        .exchange('test_exchange_publish', 'fanout', {durable: false})
         .queue('', {exclusive: true})
     })
     afterEach(() => {
@@ -185,18 +292,18 @@ describe('integration: amqp', () => {
     let publisher, subscriber1, subscriber2, subscriber3
     beforeEach(() => {
       publisher = host
-        .exchange('test_exchange', 'direct', {durable: false})
+        .exchange('test_exchange_routing', 'direct', {durable: false})
 
       subscriber1 = host
-        .exchange('test_exchange', 'direct', {durable: false})
+        .exchange('test_exchange_routing', 'direct', {durable: false})
         .queue('test_subscriber1', {exclusive: false})
 
       subscriber2 = host
-        .exchange('test_exchange', 'direct', {durable: false})
+        .exchange('test_exchange_routing', 'direct', {durable: false})
         .queue('test_subscriber2', {exclusive: false})
 
       subscriber3 = host
-        .exchange('test_exchange', 'direct', {durable: false})
+        .exchange('test_exchange_routing', 'direct', {durable: false})
         .queue('test_subscriber3', {exclusive: false})
     })
     afterEach(() => {
@@ -251,22 +358,22 @@ describe('integration: amqp', () => {
     let publisher, subscriber1, subscriber2, subscriber3, subscriber4
     beforeEach(() => {
       publisher = host
-        .exchange('test_exchange', 'topic', {durable: false})
+        .exchange('test_exchange_topic', 'topic', {durable: false})
 
       subscriber1 = host
-        .exchange('test_exchange', 'topic', {durable: false})
+        .exchange('test_exchange_topic', 'topic', {durable: false})
         .queue('test_subscriber1', {exclusive: false})
 
       subscriber2 = host
-        .exchange('test_exchange', 'topic', {durable: false})
+        .exchange('test_exchange_topic', 'topic', {durable: false})
         .queue('test_subscriber2', {exclusive: false})
 
       subscriber3 = host
-        .exchange('test_exchange', 'topic', {durable: false})
+        .exchange('test_exchange_topic', 'topic', {durable: false})
         .queue('test_subscriber3', {exclusive: false})
 
       subscriber4 = host
-        .exchange('test_exchange', 'topic', {durable: false})
+        .exchange('test_exchange_topic', 'topic', {durable: false})
         .queue('test_subscriber4', {exclusive: false})
     })
     afterEach(() => {
@@ -336,15 +443,15 @@ describe('integration: amqp', () => {
         })
     })
   })
-  describe('Connecting to cluster', () => {
+  describe('works', () => {
     let publisher, subscriber
     before(() => {
       host = amqp(['amqp://notlocalhost', 'amqp://notlocalhost', 'amqp://localhost'])
       return host.connect()
     })
     beforeEach(() => {
-      publisher = host.queue('test_hello', {durable: false})
-      subscriber = host.queue('test_hello', {durable: false})
+      publisher = host.queue('test_cluster', {durable: false})
+      subscriber = host.queue('test_cluster', {durable: false})
     })
     afterEach(() => {
       return Promise
