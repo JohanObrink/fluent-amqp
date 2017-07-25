@@ -7,12 +7,19 @@
     "afterEach": true,
     "beforeEach": true,
     "describe": true,
-    "it": true
+    "it": true,
+    "host": true,
+    "wait": true,
+    "expect": true,
+    "spy": true,
+    "stub": true,
+    "match": true
   },
 
   "rules": {
     "arrow-parens": 0,
     "no-unexpected-multiline": 2,
+    "no-unused-expressions": 0,
     "no-var": 2,
     "prefer-const": 2
   }

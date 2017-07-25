@@ -4,7 +4,6 @@ const {spy, stub, useFakeTimers} = require('sinon')
 const proxyquire = require('proxyquire')
 const {EventEmitter} = require('events')
 chai.use(require('sinon-chai'))
-require('sinon-as-promised')
 
 function tick (num = 1) {
   if (num <= 1) {
