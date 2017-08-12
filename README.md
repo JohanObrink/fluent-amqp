@@ -174,3 +174,13 @@ just add them as an array.
 ```javascript
 amqp(['amqp://host1', 'amqp://host2', 'amqp://host3'])
 ```
+
+### Piping
+
+You can pipe messages from one Highland stream to rabbit using:
+
+```javascript
+const events = _(['event 1', 'event 2', 'event 3'])
+const queue = amqp(url).queue('events', {durable: true})
+events.pipe(queue)
+```
