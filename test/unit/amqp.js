@@ -29,6 +29,7 @@ describe('lib/amqp', () => {
       assertQueue: stub().resolves(queue),
       bindQueue: stub(),
       consume: stub(),
+      on: stub(),
       publish: stub().resolves(),
       sendToQueue: stub().resolves()
     }
