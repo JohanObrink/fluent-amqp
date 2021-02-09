@@ -10,7 +10,7 @@ To run the examples:
 
 This will send a simple message on the queue `hello`
 
-  * In terminal window 1, run `node simple/recieve`
+  * In terminal window 1, run `node simple/receive`
   * In terminal window 2, run `node simple/send Hello there!`
 
 ## pubsub
